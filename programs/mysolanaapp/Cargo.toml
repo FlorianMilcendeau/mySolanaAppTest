@@ -1,0 +1,21 @@
+[package]
+name = "mysolanaapp"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2018"
+
+[programs.localnet]
+mysolanaapp = "B2QVCQX967aorjgYVEuhE8fGXRYpoRycPKZjSrVicwEa"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "mysolanaapp"
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.17.0"
