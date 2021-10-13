@@ -8,9 +8,9 @@ describe("mysolanaapp", () => {
   anchor.setProvider(provider);
   const program = anchor.workspace.Mysolanaapp;
 
-  it("Create a counter", async () => {
+  it("Create Account", async () => {
     const baseAccount = anchor.web3.Keypair.generate();
-    await program.rpc.create({
+    await program.rpc.initialize("Hello world", {
       accounts: {
         baseAccount: baseAccount.publicKey,
         user: provider.wallet.publicKey,
@@ -20,33 +20,41 @@ describe("mysolanaapp", () => {
     });
 
     const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-    const count = account.count.toString();
-    console.log("Count 1:", count);
-    assert.ok(count === "0");
+    const { data, dataList } = account;
+
+    assert.strictEqual(data, "Hello world");
+    assert.ok(dataList.length === 1);
+    assert.strictEqual(dataList[0], "Hello world");
     _baseAccount = baseAccount;
   });
 
-  it("Icrement a counter", async () => {
+  it("Update account's data", async () => {
     const baseAccount = _baseAccount;
 
-    await program.rpc.increment({
+    await program.rpc.update("New data", {
       accounts: {
         baseAccount: baseAccount.publicKey,
       },
     });
 
     const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-    const count = account.count.toString();
-    console.log("Count 2:", count);
-    assert.ok(count === "1");
+    const { data, dataList } = account;
+
+    assert.strictEqual(data, "New data");
+    assert.ok(dataList.length === 2);
+    assert.strictEqual(dataList[0], "Hello world");
+    assert.strictEqual(dataList[1], "New data");
   });
 
   it("Get account", async () => {
     const baseAccount = _baseAccount;
 
     const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-    const count = account.count.toString();
-    console.log("Count 2:", count);
-    assert.ok(count === "1");
+    const { data, dataList } = account;
+
+    assert.strictEqual(data, "New data");
+    assert.ok(dataList.length === 2);
+    assert.strictEqual(dataList[0], "Hello world");
+    assert.strictEqual(dataList[1], "New data");
   });
 });

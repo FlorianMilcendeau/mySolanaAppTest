@@ -1,85 +1,86 @@
-import { useEffect, useState } from "react";
-import { PublicKey } from "@solana/web3.js";
-import { Idl, web3 } from "@project-serum/anchor";
+import { ChangeEvent, useEffect, useState } from "react";
 import { getPhantomWallet } from "@solana/wallet-adapter-wallets";
 import { ConnectionProvider, useWallet, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { v4 as uuidV4 } from "uuid";
 
-import idl from "./config/idl.json";
-import kp from "./config/keypair.json";
-import { createCounter, getCounter, getProvider, incrementCounter } from "./services/Account";
 import "./App.css";
+import useAccount from "./hooks/account";
+import { NETWORK } from "./contantes";
+import { IAccount } from "./services/account";
 
 const wallets = [getPhantomWallet()];
 
-const opts = {
-  preflightCommitment: "processed" as const,
-};
-const programID = new PublicKey(idl.metadata.address);
-const network = "http://127.0.0.1:8899";
-
-const arr = Object.values(kp._keypair.secretKey);
-const secret = new Uint8Array(arr);
-const secretPair = web3.Keypair.fromSecretKey(secret);
-
 function App() {
-  const [value, setValue] = useState(null);
+  const [value, setValue] = useState<IAccount>({ data: null, dataList: null });
+  const [form, setForm] = useState<string>("");
   const wallet = useWallet();
+  const { Account } = useAccount(wallet);
+
+  console.log(value);
 
   const getAccount = async (): Promise<void> => {
-    const provider = await getProvider(network, wallet, opts.preflightCommitment);
-    const account = await getCounter(idl as Idl, programID, secretPair, provider);
+    const account = await Account.getAccount();
 
-    if (account) {
-      console.log("account: ", account);
-      setValue(account.count.toString());
+    if (account && account.dataList.length) {
+      setValue({ data: account.data, dataList: account.dataList });
     }
   };
 
   useEffect(() => {
-    getAccount();
-  }, []);
+    if (Account && wallet.connected) {
+      getAccount();
+    }
+  }, [wallet.connected]);
 
-  const create = async (): Promise<void> => {
-    const provider = await getProvider(network, wallet, opts.preflightCommitment);
-    const account = await createCounter(idl as Idl, programID, secretPair, provider);
+  const initialize = async (data: string): Promise<void> => {
+    const account = await Account.initialize(data);
 
     if (account) {
-      console.log("account: ", account);
-      setValue(account.count.toString());
+      setValue({ data: account.data, dataList: account.dataList });
     }
   };
 
-  const increment = async (): Promise<void> => {
-    const provider = await getProvider(network, wallet, opts.preflightCommitment);
-    const account = await incrementCounter(idl as Idl, programID, secretPair, provider);
+  const update = async (data: string): Promise<void> => {
+    const account = await Account.update(data);
 
     if (account) {
-      console.log("Account:", account);
-      setValue(account.count.toString());
+      setValue({ data: account.data, dataList: account.dataList });
     }
   };
 
-  return !(wallet as any).connected ? (
+  return !wallet.connected ? (
     <div style={{ display: "flex", justifyContent: "center", marginTop: "100px" }}>
       <WalletMultiButton />
     </div>
   ) : (
     <div className="App">
       <div>
-        {!value ? (
-          <button onClick={create}>Create a counter</button>
+        <input onChange={(e: ChangeEvent<HTMLInputElement>) => setForm(e.target.value)} />
+        {!value.data ? (
+          <button onClick={() => initialize(form)}>Create account</button>
         ) : (
-          <button onClick={increment}>Icrement the counter</button>
+          <button onClick={() => update(form)}>Update account</button>
         )}
-        {value && value > Number(0) ? <h2>{value}</h2> : <h3>Please create a counter</h3>}
       </div>
+      {value.dataList ? (
+        <>
+          <h3>{value.data}</h3>
+          <ul>
+            {value.dataList &&
+              value.dataList.length &&
+              value.dataList.map((item: string) => <li key={uuidV4()}>{item}</li>)}
+          </ul>
+        </>
+      ) : (
+        <h3>Please create account</h3>
+      )}
     </div>
   );
 }
 
 const AppWithProvider = () => (
-  <ConnectionProvider endpoint={network}>
+  <ConnectionProvider endpoint={NETWORK}>
     <WalletProvider wallets={wallets} autoConnect>
       <WalletModalProvider>
         <App />

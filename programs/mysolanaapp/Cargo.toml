@@ -5,7 +5,7 @@ description = "Created with Anchor"
 edition = "2018"
 
 [programs.localnet]
-mysolanaapp = "B2QVCQX967aorjgYVEuhE8fGXRYpoRycPKZjSrVicwEa"
+mysolanaapp = "Cd5pKiQtUusXou6shdYHzKKnpnyYG5Q2jPPd51ESfWCr"
 
 [lib]
 crate-type = ["cdylib", "lib"]

@@ -3,7 +3,7 @@
   "name": "mysolanaapp",
   "instructions": [
     {
-      "name": "create",
+      "name": "initialize",
       "accounts": [
         {
           "name": "baseAccount",
@@ -21,10 +21,15 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "data",
+          "type": "string"
+        }
+      ]
     },
     {
-      "name": "increment",
+      "name": "update",
       "accounts": [
         {
           "name": "baseAccount",
@@ -32,7 +37,12 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "data",
+          "type": "string"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -42,14 +52,20 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "count",
-            "type": "u64"
+            "name": "data",
+            "type": "string"
+          },
+          {
+            "name": "dataList",
+            "type": {
+              "vec": "string"
+            }
           }
         ]
       }
     }
   ],
   "metadata": {
-    "address": "9Dv5Dqj5YvdDrqpBczMQm2dNSvY1DTFdsvwiAmPBLruJ"
+    "address": "Cd5pKiQtUusXou6shdYHzKKnpnyYG5Q2jPPd51ESfWCr"
   }
 }
